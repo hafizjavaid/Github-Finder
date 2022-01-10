@@ -25,7 +25,7 @@ export default createStore({
         {
           method: "GET",
           headers: {
-            Authorization: `token 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`,
+            Authorization: `token`,
           },
         }
       );
