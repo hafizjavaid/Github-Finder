@@ -1,4 +1,5 @@
 import { createStore } from "vuex";
+import { requestUrl } from "../urlRequest";
 
 export default createStore({
   state: {
@@ -28,17 +29,10 @@ export default createStore({
   actions: {
     async searchUsers({ commit }, text) {
       commit("SET_LOADING", true);
-
-      const response = await fetch(
-        `${process.env.VUE_APP_GITHUB_URL}/search/users?q=${text}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `token ${process.env.VUE_APP_GITHUB_TOKEN}`,
-          },
-        }
+      const response = await requestUrl.get(
+        `${process.env.VUE_APP_GITHUB_URL}/search/users?q=${text}`
       );
-      const { items } = await response.json();
+      const { items } = await response.data;
 
       commit("SET_USERS", items);
       commit("SET_LOADING", false);
@@ -55,24 +49,15 @@ export default createStore({
 
       try {
         const [user, repos] = await Promise.all([
-          await fetch(`${process.env.VUE_APP_GITHUB_URL}/users/${userName}`, {
-            method: "GET",
-            headers: {
-              Authorization: `token ${process.env.VUE_APP_GITHUB_TOKEN}`,
-            },
-          }),
-          await fetch(
-            `${process.env.VUE_APP_GITHUB_URL}/users/${userName}/repos`,
-            {
-              method: "GET",
-              headers: {
-                Authorization: `token ${process.env.VUE_APP_GITHUB_TOKEN}`,
-              },
-            }
+          await requestUrl.get(
+            `${process.env.VUE_APP_GITHUB_URL}/users/${userName}`
+          ),
+          await requestUrl.get(
+            `${process.env.VUE_APP_GITHUB_URL}/users/${userName}/repos`
           ),
         ]);
-        commit("SET_REPOS", await repos.json());
-        commit("SET_USER", await user.json());
+        commit("SET_REPOS", repos.data.reverse());
+        commit("SET_USER", user.data);
         commit("SET_LOADING", false);
       } catch (e) {
         commit("SET_ALERT", {
