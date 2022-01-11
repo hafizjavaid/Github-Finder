@@ -30,7 +30,7 @@ export default createStore({
       commit("SET_LOADING", true);
 
       const response = await fetch(
-        `https://api.github.com/search/users?q=${text}`,
+        `${process.env.VUE_APP_GITHUB_URL}/search/users?q=${text}`,
         {
           method: "GET",
           headers: {
@@ -50,50 +50,36 @@ export default createStore({
       }, 3000);
     },
 
-    async getSingleUser({ commit }, userName) {
+    async getUserAndRepos({ commit }, userName) {
       commit("SET_LOADING", true);
-      try {
-        const response = await fetch(`https://api.github.com/users/${userName}`, {
-          method: "GET",
-          headers: {
-            Authorization: `token ${process.env.VUE_APP_GITHUB_TOKEN}`,
-          },
-        });
-        const user = await response.json();
 
-        
-        console.log(user);
-        commit("SET_USER", user);
+      try {
+        const [user, repos] = await Promise.all([
+          await fetch(`${process.env.VUE_APP_GITHUB_URL}/users/${userName}`, {
+            method: "GET",
+            headers: {
+              Authorization: `token ${process.env.VUE_APP_GITHUB_TOKEN}`,
+            },
+          }),
+          await fetch(
+            `${process.env.VUE_APP_GITHUB_URL}/users/${userName}/repos`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `token ${process.env.VUE_APP_GITHUB_TOKEN}`,
+              },
+            }
+          ),
+        ]);
+        commit("SET_REPOS", await repos.json());
+        commit("SET_USER", await user.json());
         commit("SET_LOADING", false);
       } catch (e) {
-        console.log(e);
         commit("SET_ALERT", {
           type: "error",
           msg: e,
         });
-        commit("SET_LOADING", false);
-      }
-    },
-
-    async getUserRepos({ commit }, userName) {
-      commit("SET_LOADING", true);
-      try {
-        const response = await fetch(`https://api.github.com/users/${userName}/repos`, {
-          method: "GET",
-          headers: {
-            Authorization: `token ${process.env.VUE_APP_GITHUB_TOKEN}`,
-          },
-        });
-        const repos = await response.json();
-        console.log(repos);
-        commit("SET_REPOS", repos);
-        commit("SET_LOADING", false);
-      } catch (e) {
         console.log(e);
-        commit("SET_ALERT", {
-          type: "error",
-          msg: e,
-        });
         commit("SET_LOADING", false);
       }
     },

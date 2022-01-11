@@ -124,11 +124,10 @@ export default {
   components: { RepoList },
   name: "User",
   methods: {
-    ...mapActions(["getSingleUser", "getUserRepos"]),
+    ...mapActions(["getUserAndRepos"]),
   },
   mounted() {
-    this.getSingleUser(this.$route.params.id);
-    this.getUserRepos(this.$route.params.id);
+    this.getUserAndRepos(this.$route.params.id);
   },
   computed: {
     ...mapState({
