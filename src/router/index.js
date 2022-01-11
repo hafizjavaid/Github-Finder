@@ -1,6 +1,9 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 import Home from "../views/Home.vue";
 import About from "../views/About.vue";
+import User from "../views/User.vue";
+
+
 import NotFound from "../views/NotFound.vue";
 
 const routes = [
@@ -13,6 +16,11 @@ const routes = [
     path: "/about",
     name: "About",
     component: About,
+  },
+  {
+    path: "/user/:id",
+    name: "User",
+    component: User,
   },
   {
     path: "/:catchAll(.*)",
